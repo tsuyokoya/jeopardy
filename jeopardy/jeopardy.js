@@ -20,14 +20,37 @@
 
 let categories = [];
 
-
 /** Get NUM_CATEGORIES random category from API.
  *
  * Returns array of category ids
  */
 
-function getCategoryIds() {
-}
+const getCategoryIds = async () => {
+  const categoriesArray = await axios
+    .get("http://jservice.io/api/categories", {
+      params: {
+        count: 100,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+      return res.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  const NUM_CATEGORIES = _.sampleSize(categoriesArray, 6);
+
+  for (const category of NUM_CATEGORIES) {
+    categories.push(category.id);
+  }
+
+  console.log(categories);
+  return categories;
+};
+
+getCategoryIds();
 
 /** Return object with data about a category:
  *
@@ -41,8 +64,27 @@ function getCategoryIds() {
  *   ]
  */
 
-function getCategory(catId) {
-}
+const getCategory = async (catId) => {
+  const categoryData = await axios
+    .get("http://jservice.io/api/category", {
+      params: {
+        id: catId,
+      },
+    })
+    .then((res) => {
+      console.log(res.data);
+      return res.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  const NUM_QUESTIONS_PER_CAT = _.sampleSize(categoryData.clues, 5);
+  console.log(NUM_QUESTIONS_PER_CAT);
+  return NUM_QUESTIONS_PER_CAT;
+};
+
+getCategory(2);
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
  *
@@ -52,8 +94,7 @@ function getCategory(catId) {
  *   (initally, just show a "?" where the question/answer would go.)
  */
 
-async function fillTable() {
-}
+const fillTable = async () => {};
 
 /** Handle clicking on a clue: show the question or answer.
  *
@@ -63,21 +104,17 @@ async function fillTable() {
  * - if currently "answer", ignore click
  * */
 
-function handleClick(evt) {
-}
+const handleClick = (evt) => {};
 
 /** Wipe the current Jeopardy board, show the loading spinner,
  * and update the button used to fetch data.
  */
 
-function showLoadingView() {
-
-}
+const showLoadingView = () => {};
 
 /** Remove the loading spinner and update the button used to fetch data. */
 
-function hideLoadingView() {
-}
+const hideLoadingView = () => {};
 
 /** Start game:
  *
@@ -86,8 +123,7 @@ function hideLoadingView() {
  * - create HTML table
  * */
 
-async function setupAndStart() {
-}
+const setupAndStart = async () => {};
 
 /** On click of start / restart button, set up game. */
 
