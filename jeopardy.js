@@ -6,7 +6,7 @@ let categoryNames = [];
 // and array of their respective category names
 const getCategoryIdsAndNames = async () => {
   const categoriesArray = await axios
-    .get("http://jservice.io/api/categories", {
+    .get("https://jservice.io/api/categories", {
       params: {
         count: 100,
       },
@@ -30,7 +30,7 @@ const getCategoryIdsAndNames = async () => {
 // Return category information based on category ID
 const getCategoryClues = async (categoryId) => {
   const categoryData = await axios
-    .get("http://jservice.io/api/category", {
+    .get("https://jservice.io/api/category", {
       params: {
         id: categoryId,
       },
