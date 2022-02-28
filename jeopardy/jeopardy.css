@@ -1,7 +1,105 @@
-/* some colors you may find useful:
-  #115ff4
-  #060ce9
-  #28a200
-  #8d2ab5
-  #74119c
-*/
+body {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+table,
+td {
+  border: 2px solid white;
+  border-collapse: collapse;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: blue;
+  width: 80vw;
+  height: 80vh;
+  table-layout: fixed;
+}
+
+td {
+  height: 100px;
+  width: 100px;
+  text-align: center;
+}
+
+td.question-mark:hover {
+  transform: translateY(-15px);
+  font-size: 80px;
+  transition-duration: 1s;
+}
+
+thead {
+  background-color: gold;
+  color: blue;
+  font-weight: bolder;
+}
+
+tbody {
+  color: gold;
+  cursor: pointer;
+}
+
+#busy {
+  border: 50px solid blue;
+  border-top: 50px solid gold;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  animation: load 1.5s linear infinite;
+}
+
+@keyframes load {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+#start-btn {
+  font-size: 100px;
+  color: gold;
+  background-color: blue;
+  border: 5px solid gold;
+  height: 20vh;
+  width: 80vw;
+  cursor: pointer;
+  transition-duration: 1s;
+}
+
+#start-btn:hover,
+#new-btn:hover {
+  color: blue;
+  background-color: gold;
+  transform: scale(1.2);
+}
+
+.answer {
+  font-weight: bolder;
+  color: rgb(5, 236, 5);
+}
+
+#new-btn {
+  font-size: 50px;
+  color: gold;
+  background-color: blue;
+  border: 5px solid gold;
+  height: 10vh;
+  width: 40vw;
+  cursor: pointer;
+  margin-top: 20px;
+  transition-duration: 1s;
+}

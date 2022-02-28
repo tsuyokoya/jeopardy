@@ -1,31 +1,10 @@
-// categories is the main data structure for the app; it looks like this:
+let categoryIds = [];
+let categoryNames = [];
 
-//  [
-//    { title: "Math",
-//      clues: [
-//        {question: "2+2", answer: 4, showing: null},
-//        {question: "1+1", answer: 2, showing: null}
-//        ...
-//      ],
-//    },
-//    { title: "Literature",
-//      clues: [
-//        {question: "Hamlet Author", answer: "Shakespeare", showing: null},
-//        {question: "Bell Jar Author", answer: "Plath", showing: null},
-//        ...
-//      ],
-//    },
-//    ...
-//  ]
-
-let categories = [];
-
-/** Get NUM_CATEGORIES random category from API.
- *
- * Returns array of category ids
- */
-
-const getCategoryIds = async () => {
+// Get categories from API and
+// return array of 6 random category IDs
+// and array of their respective category names
+const getCategoryIdsAndNames = async () => {
   const categoriesArray = await axios
     .get("http://jservice.io/api/categories", {
       params: {
@@ -33,7 +12,6 @@ const getCategoryIds = async () => {
       },
     })
     .then((res) => {
-      console.log(res.data);
       return res.data;
     })
     .catch((err) => {
@@ -43,36 +21,21 @@ const getCategoryIds = async () => {
   const NUM_CATEGORIES = _.sampleSize(categoriesArray, 6);
 
   for (const category of NUM_CATEGORIES) {
-    categories.push(category.id);
+    categoryIds.push(category.id);
+    categoryNames.push(category.title);
   }
-
-  console.log(categories);
-  return categories;
+  return [categoryIds, categoryNames];
 };
 
-getCategoryIds();
-
-/** Return object with data about a category:
- *
- *  Returns { title: "Math", clues: clue-array }
- *
- * Where clue-array is:
- *   [
- *      {question: "Hamlet Author", answer: "Shakespeare", showing: null},
- *      {question: "Bell Jar Author", answer: "Plath", showing: null},
- *      ...
- *   ]
- */
-
-const getCategory = async (catId) => {
+// Return category information based on category ID
+const getCategoryClues = async (categoryId) => {
   const categoryData = await axios
     .get("http://jservice.io/api/category", {
       params: {
-        id: catId,
+        id: categoryId,
       },
     })
     .then((res) => {
-      console.log(res.data);
       return res.data;
     })
     .catch((err) => {
@@ -80,11 +43,8 @@ const getCategory = async (catId) => {
     });
 
   const NUM_QUESTIONS_PER_CAT = _.sampleSize(categoryData.clues, 5);
-  console.log(NUM_QUESTIONS_PER_CAT);
   return NUM_QUESTIONS_PER_CAT;
 };
-
-getCategory(2);
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
  *
@@ -94,7 +54,38 @@ getCategory(2);
  *   (initally, just show a "?" where the question/answer would go.)
  */
 
-const fillTable = async () => {};
+const height = 6;
+const width = 5;
+
+const fillTable = (clues) => {
+  $("body").append(`
+    <table>
+      <thead>
+        <tr class="header"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>`);
+
+  // Populates header for category names
+  for (const name of categoryNames) {
+    $(".header").append(`
+      <td class="header-td">${name.toUpperCase()}</td>
+    `);
+  }
+
+  // Creates rows and cells with unique ids
+  for (let i = 0; i < height - 1; i++) {
+    $("tbody").append(`<tr id="${i}"></tr>`);
+    for (let j = 0; j <= width; j++) {
+      $(`#${i}`).append(`<td class="question-mark"id="${j}-${i}">?</td>`);
+    }
+  }
+
+  // Handle click on non-header tds
+  $("tbody td").on("click", (e) => {
+    handleClick(e, clues);
+  });
+};
 
 /** Handle clicking on a clue: show the question or answer.
  *
@@ -104,17 +95,47 @@ const fillTable = async () => {};
  * - if currently "answer", ignore click
  * */
 
-const handleClick = (evt) => {};
+const handleClick = (e, clues) => {
+  const column = Number(e.target.id[0]);
+  const row = Number(e.target.id[2]);
+
+  let text;
+  if (e.target.className === "question-mark") {
+    e.target.className = "question";
+    text = clues[column][row].question;
+  } else if (e.target.className === "question") {
+    e.target.className = "answer";
+    text = clues[column][row].answer;
+    e.target.style.pointerEvents = "none";
+  }
+
+  e.target.innerHTML = text;
+};
 
 /** Wipe the current Jeopardy board, show the loading spinner,
  * and update the button used to fetch data.
  */
 
-const showLoadingView = () => {};
+const showLoadingView = () => {
+  // Remove loading spinner & add button for new game
+  $("body").append("<div id='busy'></div>");
+};
 
 /** Remove the loading spinner and update the button used to fetch data. */
 
-const hideLoadingView = () => {};
+const hideLoadingView = () => {
+  $("#busy").remove();
+};
+
+const resetBoardAndButton = () => {
+  $("#new-btn").on("click", () => {
+    categoryIds = [];
+    categoryNames = [];
+    $("table").remove();
+    $("#new-btn").remove();
+    setupAndStart();
+  });
+};
 
 /** Start game:
  *
@@ -123,12 +144,32 @@ const hideLoadingView = () => {};
  * - create HTML table
  * */
 
-const setupAndStart = async () => {};
+const setupAndStart = async () => {
+  showLoadingView();
 
-/** On click of start / restart button, set up game. */
+  const categoryIdsAndNames = await getCategoryIdsAndNames();
+  const clues = [];
 
-// TODO
+  // For each category ID, get category details
+  for (const categoryId of categoryIdsAndNames[0]) {
+    clues.push(await getCategoryClues(categoryId));
+  }
 
-/** On page load, add event handler for clicking clues */
+  // Append to DOM when start button clicked
+  fillTable(clues);
+  $("body").append(
+    "<div class='center'><button id='new-btn'>NEW GAME</button></div>"
+  );
+  hideLoadingView();
+  resetBoardAndButton();
+};
 
-// TODO
+$(document).ready(() => {
+  $("body").append(
+    "<div class='center start'><button id='start-btn'>START JEOPARDY</button></div>"
+  );
+  $("#start-btn").on("click", () => {
+    $(".start").remove();
+    setupAndStart();
+  });
+});
