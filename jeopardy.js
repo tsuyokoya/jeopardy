@@ -1,5 +1,19 @@
+$(document).ready(() => {
+  $("body").append(
+    `<div class='center start'>
+      <button id='start-btn'>START JEOPARDY</button>
+     </div>`
+  );
+  $("#start-btn").on("click", () => {
+    $(".start").remove();
+    setupAndStart();
+  });
+});
+
 let categoryIds = [];
 let categoryNames = [];
+const height = 6;
+const width = 5;
 
 // Get categories from API and
 // return array of 6 random category IDs
@@ -54,9 +68,6 @@ const getCategoryClues = async (categoryId) => {
  *   (initally, just show a "?" where the question/answer would go.)
  */
 
-const height = 6;
-const width = 5;
-
 const fillTable = (clues) => {
   $("body").append(`
     <table>
@@ -89,9 +100,9 @@ const fillTable = (clues) => {
 
 /** Handle clicking on a clue: show the question or answer.
  *
- * Uses .showing property on clue to determine what to show:
- * - if currently null, show question & set .showing to "question"
- * - if currently "question", show answer & set .showing to "answer"
+ * Uses various classes to determine what to show:
+ * - if currently "question-mark", show question & set className to "question"
+ * - if currently "question", show answer & set className to "answer"
  * - if currently "answer", ignore click
  * */
 
@@ -112,21 +123,7 @@ const handleClick = (e, clues) => {
   e.target.innerHTML = text;
 };
 
-/** Wipe the current Jeopardy board, show the loading spinner,
- * and update the button used to fetch data.
- */
-
-const showLoadingView = () => {
-  // Remove loading spinner & add button for new game
-  $("body").append("<div id='busy'></div>");
-};
-
-/** Remove the loading spinner and update the button used to fetch data. */
-
-const hideLoadingView = () => {
-  $("#busy").remove();
-};
-
+// Resets the board and reset button
 const resetBoardAndButton = () => {
   $("#new-btn").on("click", () => {
     categoryIds = [];
@@ -137,15 +134,17 @@ const resetBoardAndButton = () => {
   });
 };
 
-/** Start game:
+/** Setup and start game:
  *
+ * - start loading spinner
  * - get random category Ids
  * - get data for each category
- * - create HTML table
+ * - create HTML table & append data to DOM
+ * - remove loading spinner & append reset button
  * */
 
 const setupAndStart = async () => {
-  showLoadingView();
+  $("body").append("<div id='busy'></div>");
 
   const categoryIdsAndNames = await getCategoryIdsAndNames();
   const clues = [];
@@ -160,16 +159,7 @@ const setupAndStart = async () => {
   $("body").append(
     "<div class='center'><button id='new-btn'>NEW GAME</button></div>"
   );
-  hideLoadingView();
+
+  $("#busy").remove();
   resetBoardAndButton();
 };
-
-$(document).ready(() => {
-  $("body").append(
-    "<div class='center start'><button id='start-btn'>START JEOPARDY</button></div>"
-  );
-  $("#start-btn").on("click", () => {
-    $(".start").remove();
-    setupAndStart();
-  });
-});
