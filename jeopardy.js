@@ -9,13 +9,17 @@ $(document).ready(() => {
     $(".start").remove();
     setupAndStart();
   });
+  autoStartGame();
 });
 
 // Display count down and automatically start game after 10 seconds
 const autoStartGame = () => {
   let counter = 9;
   const interval = setInterval(() => {
-    if (counter === 0) {
+    // Clear interval if element does not exist (ie button was clicked)
+    if (!document.querySelector("#auto-start")) {
+      clearInterval(interval);
+    } else if (counter === 0) {
       $(".start").remove();
       setupAndStart();
       clearInterval(interval);
@@ -28,56 +32,47 @@ const autoStartGame = () => {
   }, 1000);
 };
 
-autoStartGame();
-
 let categoryIds = [];
 let categoryNames = [];
 const height = 6;
 const width = 5;
+const getRandom = _.sampleSize;
 
 // Get categories from API and
 // return array of 6 random category IDs
 // and array of their respective category names
 const getCategoryIdsAndNames = async () => {
-  const categoriesArray = await axios
-    .get("https://jservice.io/api/categories", {
+  try {
+    const categories = await axios.get("https://jservice.io/api/categories", {
       params: {
         count: 100,
       },
-    })
-    .then((res) => {
-      return res.data;
-    })
-    .catch((err) => {
-      console.log(err);
     });
+    const numCategories = getRandom(categories.data, 6);
 
-  const NUM_CATEGORIES = _.sampleSize(categoriesArray, 6);
-
-  for (const category of NUM_CATEGORIES) {
-    categoryIds.push(category.id);
-    categoryNames.push(category.title);
+    for (const category of numCategories) {
+      categoryIds.push(category.id);
+      categoryNames.push(category.title);
+    }
+    return [categoryIds, categoryNames];
+  } catch (error) {
+    console.log(error);
   }
-  return [categoryIds, categoryNames];
 };
 
 // Return category information based on category ID
 const getCategoryClues = async (categoryId) => {
-  const categoryData = await axios
-    .get("https://jservice.io/api/category", {
+  try {
+    const categoryData = await axios.get("https://jservice.io/api/category", {
       params: {
         id: categoryId,
       },
-    })
-    .then((res) => {
-      return res.data;
-    })
-    .catch((err) => {
-      console.log(err);
     });
-
-  const NUM_QUESTIONS_PER_CAT = _.sampleSize(categoryData.clues, 5);
-  return NUM_QUESTIONS_PER_CAT;
+    const numQuestionsPerCat = getRandom(categoryData.data.clues, 5);
+    return numQuestionsPerCat;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
@@ -166,16 +161,14 @@ const resetBoardAndButton = () => {
 const setupAndStart = async () => {
   $("body").append("<div id='busy'></div>");
 
-  const categoryIdsAndNames = await getCategoryIdsAndNames();
-  const clues = [];
+  await getCategoryIdsAndNames();
 
-  // For each category ID, get category details
-  for (const categoryId of categoryIdsAndNames[0]) {
-    clues.push(await getCategoryClues(categoryId));
-  }
+  // Array of promises to get clues for each category id
+  const promisesArray = categoryIds.map((id) => getCategoryClues(id));
+  const allClues = await Promise.all(promisesArray);
 
   // Append to DOM when start button clicked
-  fillTable(clues);
+  fillTable(allClues);
   $("body").append(
     "<div class='center'><button id='new-btn'>NEW GAME</button></div>"
   );
