@@ -1,6 +1,6 @@
 # Jeopardy!
 
-<img src='./jeopardy.png' alt='jeopardy screenshot' height='350' width='500'>
+<img src='./jeopardy.png' alt='jeopardy screenshot' height='450' width='600'>
 
 ## 🧐 Project Description
 
