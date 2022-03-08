@@ -2,13 +2,33 @@ $(document).ready(() => {
   $("body").append(
     `<div class='center start'>
       <button id='start-btn'>START JEOPARDY</button>
-     </div>`
+     </div>
+     <div class='start' id='auto-start'>Game automatically starts in...10</div>`
   );
   $("#start-btn").on("click", () => {
     $(".start").remove();
     setupAndStart();
   });
 });
+
+// Display count down and automatically start game after 10 seconds
+const autoStartGame = () => {
+  let counter = 9;
+  const interval = setInterval(() => {
+    if (counter === 0) {
+      $(".start").remove();
+      setupAndStart();
+      clearInterval(interval);
+    } else {
+      document.querySelector(
+        "#auto-start"
+      ).innerText = `Game automatically starts in...${counter}`;
+      counter--;
+    }
+  }, 1000);
+};
+
+autoStartGame();
 
 let categoryIds = [];
 let categoryNames = [];
