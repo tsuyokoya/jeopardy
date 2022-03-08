@@ -1,5 +1,7 @@
 # Jeopardy!
 
+<img src='./jeopardy.png' alt='jeopardy screenshot' height='350' width='500'>
+
 ## 🧐 Project Description
 
 Jeopardy - one of the longest running game shows in American history. Take your shot at answering some tough questions with this project that I created using the jService API!
